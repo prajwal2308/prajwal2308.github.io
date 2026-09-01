@@ -246,7 +246,7 @@ h2.pname{font-family:var(--display);font-weight:800;font-size:clamp(2rem,4.4vw,4
           <span class="clip"><span>I build</span></span>
           <span class="clip c2"><span><span class="cyc" id="cyc" aria-live="polite"></span></span></span>
         </h1>
-        <p class="ideck">Engineer with <b>2.5 years</b> across cloud infrastructure, backend systems, developer tooling and applied AI. MS Computer Science, Rutgers. Five projects follow, in detail.</p>
+        <p class="ideck">Engineer with <b>2.5 years</b> across cloud infrastructure, backend systems, developer tooling and applied AI. MS Computer Science, Rutgers. Six projects follow, in detail.</p>
         <div class="istats">
           <div><b class="num" data-to="2.5" data-dec="1">0</b><span>Years shipping<br>production</span></div>
           <div><b class="num" data-to="99.9" data-dec="1" data-suffix="%">0</b><span>Uptime on the<br>platform I run</span></div>
@@ -287,6 +287,7 @@ h2.pname{font-family:var(--display);font-weight:800;font-size:clamp(2rem,4.4vw,4
       <a href="#c3"><b>03</b><span>SAGE</span><i>1st place &middot; AESIA &times; UN</i></a>
       <a href="#c4"><b>04</b><span>Hyper-Orchestrator</span><i>4.2&times; &middot; Python</i></a>
       <a href="#c5"><b>05</b><span>Thinker&ndash;Curator</span><i>Research &middot; RAG</i></a>
+      <a href="#c6"><b>06</b><span>Sawit</span><i>Multimodal &middot; RAG</i></a>
     </div>
   </div>
 </section>
@@ -483,6 +484,45 @@ h2.pname{font-family:var(--display);font-weight:800;font-size:clamp(2rem,4.4vw,4
     </div>
   </div>
 </section>
+
+<!-- ============ 06 Sawit ============ -->
+<section class="chapter right" id="c6" data-art="frames" data-name="Sawit">
+  <div class="stage">
+    <canvas class="art" aria-hidden="true"></canvas><div class="vig" aria-hidden="true"></div>
+    <div class="panel">
+      <div class="idx"><b>06</b><i></i><span class="tag blue">Shipped</span><span class="tag">Aug 2026</span></div>
+      <h2 class="pname">Sawit</h2>
+      <p class="psub">Saw it for you</p>
+      <div class="beats">
+        <div class="beat">
+          <p>Instagram&rsquo;s Saved folder is a wall of thumbnails. <b>No search, no text, no way to ask &ldquo;what was that budget split?&rdquo; six months later.</b> So people share reels to themselves in DMs and end up with a second pile they also can&rsquo;t query.</p>
+          <p>Share a reel to Sawit and about a minute later it&rsquo;s a note: the title, the steps, the numbers and the caveats &mdash; searchable.</p>
+        </div>
+        <div class="beat">
+          <p class="capt">The part that was actually hard</p>
+          <p><b>Most reels never say it out loud.</b> The useful content is text on screen over music, so speech transcription alone comes back empty.</p>
+          <p>Sawit reads the frames: a <b>12-image multimodal pass</b> over sampled stills through NVIDIA NIM, combined with faster-whisper when there <i>is</i> audio worth having. The recipe on the screen gets captured either way.</p>
+        </div>
+        <div class="beat">
+          <p class="capt">Finding it again</p>
+          <p>Notes are indexed as <b>2048-dimension embeddings</b> alongside SQLite FTS5, so a semantic query needs to share <b>zero words</b> with the note it finds &mdash; &ldquo;how should I split my paycheck&rdquo; returns the 55/5/10/15/15 reel.</p>
+          <p>Per-account isolation, 143 passing tests, self-hostable, MIT.</p>
+        </div>
+        <div class="beat">
+          <p class="capt">Finished, not maintained</p>
+          <p>It ran end to end and was deployed for a month. Development stopped because the honest answer to <i>&ldquo;would I open this every day?&rdquo;</i> was <b>no</b> &mdash; Instagram&rsquo;s own Saved folder is where people already look, and no amount of polish moves a habit that isn&rsquo;t there.</p>
+          <p>The code is public because the hard parts &mdash; reading text off frames, meaning-based search, per-account isolation and eight production-only bugs &mdash; were worth writing down rather than deleting.</p>
+        </div>
+      </div>
+      <div class="bdots" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+      <div class="chips"><span class="chip">Python</span><span class="chip">FastAPI</span><span class="chip">faster-whisper</span><span class="chip">NVIDIA NIM</span><span class="chip">RAG</span><span class="chip">SQLite FTS5</span><span class="chip">yt-dlp</span></div>
+      <div class="links">
+        <a class="lk" href="https://github.com/prajwal2308/SAWIT" target="_blank" rel="noopener">Source<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 9L9 3M9 3H4M9 3v5"/></svg></a>
+      </div>
+    </div>
+  </div>
+</section>
+
 
 <section class="outro" id="contact">
   <canvas class="art" id="outroArt" aria-hidden="true"></canvas>
@@ -834,10 +874,69 @@ var salience={
   }
 };
 
+/* ============ FRAMES (Sawit): read the text off the video ============ */
+var frames={
+  init:function(w,h,ax){
+    var st={ax:ax,fr:[],tok:[]},i;
+    for(i=0;i<7;i++) st.fr.push({o:i/7, seen:0});
+    for(i=0;i<54;i++) st.tok.push({a:rnd(0,TAU), r:rnd(.25,1), sp:rnd(.5,1.4), o:Math.random()});
+    return st;},
+  draw:function(g,w,h,t,p,st){
+    var mob=w<900, ax=mob?w*.5:st.ax, cy=h*.42;
+    var fw=mob?Math.min(w*.15,86):Math.min(w*.085,104), fh=fw*1.5, gap=fw*.30;
+    var total=st.fr.length*(fw+gap)-gap, x0=ax-total/2, i;
+    var scan=cl(p*1.25,0,1);
+    /* filmstrip */
+    for(i=0;i<st.fr.length;i++){
+      var f=st.fr[i], x=x0+i*(fw+gap), y=cy-fh/2+Math.sin(t*.0007+i)*4;
+      var done=cl((scan-i/st.fr.length)*4,0,1);
+      g.fillStyle="rgba(14,18,26,.92)"; g.fillRect(x,y,fw,fh);
+      g.strokeStyle=done>.5?"rgba(127,178,232,.5)":"rgba(255,255,255,.10)"; g.lineWidth=1;
+      g.strokeRect(x+.5,y+.5,fw-1,fh-1);
+      /* sprocket holes */
+      g.fillStyle="rgba(255,255,255,.07)";
+      for(var k=0;k<4;k++){ g.fillRect(x+3,y+6+k*(fh-12)/3,4,4); g.fillRect(x+fw-7,y+6+k*(fh-12)/3,4,4); }
+      /* caption text burned into the frame, revealed by the scan */
+      g.fillStyle="rgba(127,178,232,"+(.18+done*.62)+")";
+      for(var l=0;l<3;l++){
+        var lw=(fw-24)*(l===2?.55:(l===1?.85:1));
+        g.fillRect(x+12, y+fh*.58+l*7, lw*done, 2.5);
+      }
+      if(done>.5){
+        g.globalCompositeOperation="lighter"; g.globalAlpha=(done-.5)*.5;
+        g.drawImage(GA,x-fw*.3,y-fw*.3,fw*1.6,fw*1.6);
+        g.globalAlpha=1; g.globalCompositeOperation="source-over";
+      }
+    }
+    /* scan head */
+    var sxp=x0+scan*total;
+    if(scan>0&&scan<1){
+      var sg=g.createLinearGradient(sxp-30,0,sxp+30,0);
+      sg.addColorStop(0,"rgba(127,178,232,0)");sg.addColorStop(.5,"rgba(127,178,232,.30)");sg.addColorStop(1,"rgba(127,178,232,0)");
+      g.fillStyle=sg; g.fillRect(sxp-30,cy-fh*.75,60,fh*1.5);
+    }
+    /* semantic index below: tokens settle into a cluster */
+    var iy=cy+fh*.92, R=Math.min(w*.10,120), settle=ss(.30,.95,p);
+    g.font="500 9px PlexMono, monospace"; g.textAlign="center";
+    g.fillStyle="rgba(154,164,180,.42)";
+    g.fillText("2048-DIM EMBEDDINGS  ·  FTS5",ax,iy+R*.78);
+    g.textAlign="left";
+    g.globalCompositeOperation="lighter";
+    for(i=0;i<st.tok.length;i++){
+      var q=st.tok[i], k2=cl((settle-q.o*.5)*1.6,0,1);
+      var rr=q.r*(1-k2*.62), a2=q.a+t*.00016*q.sp;
+      var tx=ax+Math.cos(a2)*R*rr*2.1, ty=iy+Math.sin(a2)*R*rr*.62;
+      g.globalAlpha=.20+k2*.55;
+      g.drawImage(k2>.5?GA:GW, tx-4, ty-4, 8, 8);
+    }
+    g.globalAlpha=1; g.globalCompositeOperation="source-over";
+  }
+};
+
 var ARTS={
   llmshot: shots([IMG_LLM_A, IMG_LLM_B], route, "rgba(127,178,232,.30)"),
   vacsshot: shots([IMG_VACS_A, IMG_VACS_B], drift, "rgba(160,190,225,.26)"),
-  award:award, fanout:fanout, salience:salience, drift:drift
+  award:award, fanout:fanout, salience:salience, frames:frames, drift:drift
 };
 
 /* ============ ENGINE ============ */
